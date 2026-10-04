@@ -26,7 +26,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user',
+            'role' => 'student',
         ]);
 
         return redirect('/login')->with('success', 'Registration successful. You may now log in.');
@@ -38,26 +38,54 @@ class AuthController extends Controller
     }
 
     public function authenticate(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect('/dashboard')->with('success', 'Welcome back!');
-        }
+{
 
-        return back()->withErrors([
-            'email' => 'Invalid email or password.',
-        ]);
+    $credentials = $request->validate([
+
+        'email' => 'required|email',
+
+        'password' => 'required',
+
+    ]);
+
+    if (Auth::attempt($credentials)) {
+
+        $request->session()->regenerate();
+
+        return redirect('/dashboard')->with('success', 'Welcome back!');
+
     }
+
+    return back()->withErrors([
+
+        'email' => 'Invalid email or password.',
+
+    ]);
+
+}
 
     public function dashboard()
-    {
-        return view('dashboard');
+
+{
+
+    $user = Auth::user();
+
+    if (!$user) {
+
+        return redirect('/login');
+
     }
+
+    return view('auth.dashboard', [
+
+        'user' => $user,
+
+        'role' => $user->role,
+
+    ]);
+
+}
 
     public function logout(Request $request)
     {
